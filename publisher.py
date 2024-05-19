@@ -4,7 +4,9 @@ import json
 import time
 
 # MongoDB connection
-client = MongoClient('mongodb://localhost:27017/')
+username = 'vierplus'
+password = '4plus'
+client = MongoClient('mongodb://{}:{}@localhost:27017/'.format(username, password))
 db = client['VM_DB']
 collection = db['Test_Data']
 
