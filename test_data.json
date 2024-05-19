@@ -1,0 +1,11 @@
+{
+  "measurement_no": 1,
+  "measurement_timestamp": "2024-04-23T12:00:00Z",
+  "component_no": 1,
+  "component_color_hex": "#336699",
+  "component_color_name": "Blau",
+  "current_temp_c": 25.5,
+  "current_temp_f": 77.9,
+  "current_humidity": 60,
+  "current_power_consumption": 0.2
+}
