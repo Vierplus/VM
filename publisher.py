@@ -4,39 +4,36 @@ import json
 import time
 
 # MongoDB connection
-username = 'vierplus'
-password = '4plus'
-client = MongoClient('mongodb://{}:{}@localhost:27017/'.format(username, password))
-db = client['VM_DB']
-collection = db['Test_Data']
+mongo_uri = "mongodb://vierplus:4plus@localhost:27017/"
+client_mongo = MongoClient(mongo_uri)
+db = client_mongo["VM_DB"]
+collection = db["Test_Data"]
 
-# MQTT broker details
-mqtt_broker = 'localhost'
-mqtt_port = 1883
-mqtt_topic = 'fbs_vierplus'
-
-# Connect to MQTT broker
+# MQTT broker connection
+mqtt_broker_uri = "localhost"
 mqtt_client = mqtt.Client()
-mqtt_client.connect(mqtt_broker, mqtt_port)
+mqtt_client.connect(mqtt_broker_uri)
 
-# Function to fetch new data from MongoDB and publish to MQTT
-def fetch_and_publish():
-    last_id = None
-    
-    while True:
-        query = {}
-        if last_id:
-            query = {'_id': {'$gt': last_id}}  # Query for documents with an ID greater than the last processed ID
-        
-        documents = collection.find(query).sort('_id')
-        for document in documents:
-            data_to_publish = json.dumps(document)  # Convert MongoDB document to JSON
-            mqtt_client.publish(mqtt_topic, data_to_publish)
-            last_id = document['_id']  # Update last_id to the ID of the current document
-        
-        time.sleep(10)  # Wait for a specified time before checking for new data again
+# List to store IDs of documents that have been sent
+sent_document_ids = []
 
-# Start fetching and publishing data
-fetch_and_publish()
+# Initial publication of stored data
+for document in collection.find():
+    document['_id'] = str(document['_id'])
+    payload = json.dumps(document)
+    mqtt_client.publish("fbs_vierplus", payload, retain=True)
+    sent_document_ids.append(document["_id"])
 
-mqtt_client.disconnect()
+# Main loop to continuously publish new data
+while True:
+    # Fetch and publish new data from MongoDB to MQTT broker
+    for document in collection.find():
+        document_id = str(document['_id'])
+        if document_id not in sent_document_ids:
+            document['_id'] = document_id
+            payload = json.dumps(document)
+            mqtt_client.publish("fbs_vierplus", payload, retain=True)
+            sent_document_ids.append(document_id)
+
+    # Sleep for some time before fetching new data
+    time.sleep(10)
