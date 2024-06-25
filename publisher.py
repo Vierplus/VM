@@ -7,7 +7,7 @@ import time
 mongo_uri = "mongodb://vierplus:4plus@localhost:27017/"
 client_mongo = MongoClient(mongo_uri)
 db = client_mongo["VM_DB"]
-collection = db["Test_Data"]
+collection = db["Data_Collection"]
 
 # MQTT broker connection
 mqtt_broker_uri = "localhost"
@@ -21,7 +21,8 @@ sent_document_ids = []
 for document in collection.find():
     document['_id'] = str(document['_id'])
     payload = json.dumps(document)
-    mqtt_client.publish("fbs_vierplus", payload, retain=True)
+    print('Stored Data published:', payload)
+    mqtt_client.publish("fbs_vierplus_db", payload)
     sent_document_ids.append(document["_id"])
 
 # Main loop to continuously publish new data
@@ -32,7 +33,8 @@ while True:
         if document_id not in sent_document_ids:
             document['_id'] = document_id
             payload = json.dumps(document)
-            mqtt_client.publish("fbs_vierplus", payload, retain=True)
+            print('New Data published:', payload)
+            mqtt_client.publish("fbs_vierplus_db", payload)
             sent_document_ids.append(document_id)
 
     # Sleep for some time before fetching new data
