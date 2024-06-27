@@ -22,7 +22,7 @@ for document in collection.find():
     document['_id'] = str(document['_id'])
     payload = json.dumps(document)
     print('Stored Data published:', payload)
-    mqtt_client.publish("fbs_vierplus_db", payload)
+    mqtt_client.publish("fbs_vierplus_4p", payload)
     sent_document_ids.append(document["_id"])
 
 # Main loop to continuously publish new data
@@ -34,7 +34,7 @@ while True:
             document['_id'] = document_id
             payload = json.dumps(document)
             print('New Data published:', payload)
-            mqtt_client.publish("fbs_vierplus_db", payload)
+            mqtt_client.publish("fbs_vierplus_4p", payload)
             sent_document_ids.append(document_id)
 
     # Sleep for some time before fetching new data
